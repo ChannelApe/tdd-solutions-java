@@ -9,7 +9,7 @@ addons:
 jdk:
 - oraclejdk8
 script:
-- mvn clean build
+- mvn clean install
 after_success:
 - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then mvn sonar:sonar; fi
 cache:
