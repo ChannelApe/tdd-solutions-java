@@ -2,7 +2,6 @@ package com.channelape.codedojo.checkamounts;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class CheckAmountTest {
@@ -107,7 +106,6 @@ public class CheckAmountTest {
 	}
 
 	// TODO: Frank will get this test working.
-	@Ignore
 	@Test
 	public void given200673357DollarsAnd59CentsWhenSpellingOutCheckAmountThenExpectTwoHundredMillionSixHundSeventyThreeThousandThreeHundredFiftySevenAnd59Over100Dollars() {
 		final CheckAmount checkAmount = new CheckAmount("200673357.59");
