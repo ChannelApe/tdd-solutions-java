@@ -1,0 +1,18 @@
+language: java
+sudo: false
+install: true
+addons:
+  sonarcloud:
+    organization: channelape-github
+    token:
+      secure: TiPFsEUZMx/5/zLLSvnUAb0BlBdxRGhYEr7ZtGthHPATsOj0lwcrQiX1mb1itdOZcRcWZAyqM0VDYlk9tj1Hc6Ili8qJjulnA1vpbeckv18kpmzj7S50Cig/IlIKFtVJfQwOIrn4mJ+P6x3pPRKWUd/Nujm1Ri9JurQY5sAZfRbbRu9m/RLKSE4E1vmIPVsVaGDt8eWtQcXLqf8b++UdCmBE/ggYDTi0dkDik8EcrmTDDvdfff6z3w2eUAj/JPCCDW4nZc9WJR4Ml2a+HqWP2wiScn23cr6wioNhjI53CNlj3aETtBYuLn0j3z9Yu973IIm4DzAevFroyDBytWBFdsZTkWzixELNK/Gpyn/upjo8RKEgGhJwnxpnKFAvkYMQRNnRtLLlKjf+APuWeJCpy6qSm5qEacWFxgFSZ3nlin3jfSCTHlHi/O/a02Nl8urvqZIiDnc6rG1Tbf0KwqksjdlSwpUjuJVXzQgf3ARdu1viXvaXquQRNVPVbvPcWklAArxEmhLD/QzkhkI4M23nB9UjkeMMNrT/+mAEcYMDU99gG43Tkyg1ZFlw/UoV5QEkJ3E8utFdzVw/gxMla/VetT+G31Ho87Ep0X3rCW/wyICfyjsJxYjH2lNnBjs4/5ttD/gCBmGzIQ1IR3k/CYzw7VEqN8rXrX9PUlWr7JFjtaE=
+jdk:
+- oraclejdk8
+script:
+- mvn clean build
+after_success:
+- if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then mvn sonar:sonar; fi
+cache:
+  directories:
+  - $HOME/.m2
+  - $HOME/.sonar/cache
