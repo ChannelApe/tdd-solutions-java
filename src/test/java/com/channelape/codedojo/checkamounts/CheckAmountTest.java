@@ -105,7 +105,6 @@ public class CheckAmountTest {
 				actualSpelledOutCheckAmount);
 	}
 
-	// TODO: Frank will get this test working.
 	@Test
 	public void given200673357DollarsAnd59CentsWhenSpellingOutCheckAmountThenExpectTwoHundredMillionSixHundSeventyThreeThousandThreeHundredFiftySevenAnd59Over100Dollars() {
 		final CheckAmount checkAmount = new CheckAmount("200673357.59");
