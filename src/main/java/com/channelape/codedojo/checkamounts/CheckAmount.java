@@ -44,62 +44,55 @@ public class CheckAmount {
 
 	public String getSpelledOutCheckAmount() {
 		final String[] dollarsAndCents = this.value.split("\\.");
-		final String spelledOutDollarAmount = determineSpelledOutDollarAmount(dollarsAndCents[0]);
+		final StringBuilder spelledOutDollarAmount = determineSpelledOutDollarAmount(dollarsAndCents[0]);
 		final String finalString = new StringBuilder().append(spelledOutDollarAmount).append(" and ")
 				.append(determineCentAmount(dollarsAndCents)).append("/100 dollars").toString();
 		return capitalizeFirstLetter(finalString);
 	}
 
-	private String determineSpelledOutDollarAmount(final String amount) {
+	private StringBuilder determineSpelledOutDollarAmount(final String amount) {
 		final int integerAmount = Integer.parseInt(amount);
 		if (integerAmount < 1000) {
-			return determineHundredsGroup(amount);
+			return determineHundredsGroup(integerAmount);
 		}
 		if (integerAmount < 1000000) {
 			final int thousandsAmount = integerAmount / 1000;
-			final String hundredsAmountString = determineHundredsGroup(
-					String.valueOf(integerAmount - (thousandsAmount * 1000)));
-			final String thousandsAmountString = determineHundredsGroup(String.valueOf(thousandsAmount));
-			return new StringBuilder().append(thousandsAmountString).append(" thousand ").append(hundredsAmountString)
-					.toString();
+			final StringBuilder hundredsAmountString = determineHundredsGroup(integerAmount - (thousandsAmount * 1000));
+			final StringBuilder thousandsAmountString = determineHundredsGroup(thousandsAmount);
+			return new StringBuilder().append(thousandsAmountString).append(" thousand ").append(hundredsAmountString);
 		}
 		final int millionsAmount = integerAmount / 1000000;
 		final int thousandsAmount = (integerAmount - (millionsAmount * 1000000)) / 1000;
 		final int hundredsAmount = (integerAmount - (millionsAmount * 1000000) - (thousandsAmount * 1000));
-		final String hundredsAmountString = determineHundredsGroup(String.valueOf(hundredsAmount));
-		final String thousandsAmountString = determineHundredsGroup(String.valueOf(thousandsAmount));
-		final String millionsAmountString = determineHundredsGroup(String.valueOf(millionsAmount));
+		final StringBuilder hundredsAmountString = determineHundredsGroup(hundredsAmount);
+		final StringBuilder thousandsAmountString = determineHundredsGroup(thousandsAmount);
+		final StringBuilder millionsAmountString = determineHundredsGroup(millionsAmount);
 		return new StringBuilder().append(millionsAmountString).append("million ").append(thousandsAmountString)
-				.append(" thousand ").append(hundredsAmountString).toString();
+				.append(" thousand ").append(hundredsAmountString);
 	}
 
-	private String determineHundredsGroup(final String amount) {
-		final String spelledOutDollarAmount;
-		int integerAmount = Integer.parseInt(amount);
-		if (digitsToWords.containsKey(integerAmount)) {
-			spelledOutDollarAmount = digitsToWords.get(integerAmount);
+	private StringBuilder determineHundredsGroup(int amount) {
+		final StringBuilder spelledOutDollarAmountStringBuilder = new StringBuilder();
+		if (digitsToWords.containsKey(amount)) {
+			spelledOutDollarAmountStringBuilder.append(digitsToWords.get(amount));
 		} else {
-			final StringBuilder spelledOutDollarAmountStringBuilder = new StringBuilder();
-
-			final int hundreds = integerAmount / 100;
+			final int hundreds = amount / 100;
 			if (hundreds > 0) {
-				integerAmount -= hundreds * 100;
+				amount -= hundreds * 100;
 				spelledOutDollarAmountStringBuilder.append(digitsToWords.get(hundreds)).append(" hundred ");
 			}
 
-			final int tens = (integerAmount / 10) * 10;
+			final int tens = (amount / 10) * 10;
 			if (tens > 0) {
 				spelledOutDollarAmountStringBuilder.append(digitsToWords.get(tens)).append('-');
 			}
 
-			final int ones = integerAmount % 10;
+			final int ones = amount % 10;
 			if (ones > 0) {
 				spelledOutDollarAmountStringBuilder.append(digitsToWords.get(ones));
 			}
-
-			spelledOutDollarAmount = spelledOutDollarAmountStringBuilder.toString();
 		}
-		return spelledOutDollarAmount;
+		return spelledOutDollarAmountStringBuilder;
 	}
 
 	private String capitalizeFirstLetter(final String spelledOutDollarAmount) {
