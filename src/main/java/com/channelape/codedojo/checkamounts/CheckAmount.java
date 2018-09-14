@@ -5,6 +5,18 @@ import java.util.Map;
 
 public class CheckAmount {
 
+	private static final String DOLLAR_AND_CENTS_SEPERATOR = "\\.";
+	private static final String ZERO_CENTS = "00";
+	private static final String OVER_ONE_HUNDRED = "/100 dollars";
+	private static final String AND = " and ";
+	private static final String MILLION_STRING = "million ";
+	private static final String BILLION_STRING = " billion ";
+	private static final String HUNDRED_STRING = " hundred ";
+	private static final char DASH = '-';
+	private static final int ONE_THOUSAND = 1000;
+	private static final int ONE_BILLION = 1000000000;
+	private static final int ONE_MILLION = 1000000;
+	private static final String THOUSAND_STRING = " thousand ";
 	private final String value;
 	private static final Map<Long, String> digitsToWords;
 	static {
@@ -43,48 +55,47 @@ public class CheckAmount {
 	}
 
 	public String getSpelledOutCheckAmount() {
-		final String[] dollarsAndCents = this.value.split("\\.");
+		final String[] dollarsAndCents = this.value.split(DOLLAR_AND_CENTS_SEPERATOR);
 		final StringBuilder spelledOutDollarAmount = determineSpelledOutDollarAmount(dollarsAndCents[0]);
-		final String finalString = new StringBuilder().append(spelledOutDollarAmount).append(" and ")
-				.append(determineCentAmount(dollarsAndCents)).append("/100 dollars").toString();
+		final String finalString = new StringBuilder().append(spelledOutDollarAmount).append(AND)
+				.append(determineCentAmount(dollarsAndCents)).append(OVER_ONE_HUNDRED).toString();
 		return capitalizeFirstLetter(finalString);
 	}
 
 	private StringBuilder determineSpelledOutDollarAmount(final String amount) {
 		final long integerAmount = Long.parseLong(amount);
-		if (integerAmount < 1000) {
+		if (integerAmount < ONE_THOUSAND) {
 			return determineHundredsGroup(integerAmount);
 		}
-		if (integerAmount < 1000000) {
-			final long thousandsAmount = integerAmount / 1000L;
-			final StringBuilder hundredsAmountString = determineHundredsGroup(integerAmount - (thousandsAmount * 1000));
-			final StringBuilder thousandsAmountString = determineHundredsGroup(thousandsAmount);
-			return new StringBuilder().append(thousandsAmountString).append(" thousand ").append(hundredsAmountString);
-		} else if (integerAmount < 1000000000) {
+		final long billionsAmount = integerAmount / ONE_BILLION;
+		final long millionsAmount = (integerAmount - (billionsAmount * ONE_BILLION)) / ONE_MILLION;
+		final long thousandsAmount = (integerAmount - (billionsAmount * ONE_BILLION) - (millionsAmount * ONE_MILLION))
+				/ ONE_THOUSAND;
+		final long hundredsAmount = (integerAmount - (millionsAmount * ONE_MILLION) - (billionsAmount * ONE_BILLION)
+				- (thousandsAmount * ONE_THOUSAND));
 
-			final long millionsAmount = integerAmount / 1000000;
-			final long thousandsAmount = (integerAmount - (millionsAmount * 1000000)) / 1000;
-			final long hundredsAmount = (integerAmount - (millionsAmount * 1000000) - (thousandsAmount * 1000));
-			final StringBuilder hundredsAmountString = determineHundredsGroup(hundredsAmount);
-			final StringBuilder thousandsAmountString = determineHundredsGroup(thousandsAmount);
-			final StringBuilder millionsAmountString = determineHundredsGroup(millionsAmount);
-			return new StringBuilder().append(millionsAmountString).append("million ").append(thousandsAmountString)
-					.append(" thousand ").append(hundredsAmountString);
-		}
-
-		final long billionsAmount = integerAmount / 1000000000;
-		final long millionsAmount = (integerAmount - (billionsAmount * 1000000000)) / 1000000;
-		final long thousandsAmount = (integerAmount - (billionsAmount * 1000000000) - (millionsAmount * 1000000))
-				/ 1000;
-		final long hundredsAmount = (integerAmount - (millionsAmount * 1000000) - (billionsAmount * 1000000000)
-				- (thousandsAmount * 1000));
 		final StringBuilder hundredsAmountString = determineHundredsGroup(hundredsAmount);
 		final StringBuilder thousandsAmountString = determineHundredsGroup(thousandsAmount);
 		final StringBuilder millionsAmountString = determineHundredsGroup(millionsAmount);
 		final StringBuilder billionsAmountString = determineHundredsGroup(billionsAmount);
 
-		return new StringBuilder().append(billionsAmountString).append(" billion ").append(millionsAmountString)
-				.append("million ").append(thousandsAmountString).append(" thousand ").append(hundredsAmountString);
+		final StringBuilder ret = new StringBuilder();
+
+		if (billionsAmount > 0) {
+			ret.append(billionsAmountString).append(BILLION_STRING);
+		}
+
+		if (millionsAmount > 0) {
+			ret.append(millionsAmountString).append(MILLION_STRING);
+		}
+
+		if (thousandsAmount > 0) {
+			ret.append(thousandsAmountString).append(THOUSAND_STRING);
+		}
+
+		ret.append(hundredsAmountString);
+
+		return ret;
 	}
 
 	private StringBuilder determineHundredsGroup(long amount) {
@@ -95,12 +106,12 @@ public class CheckAmount {
 			final long hundreds = amount / 100;
 			if (hundreds > 0) {
 				amount -= hundreds * 100;
-				spelledOutDollarAmountStringBuilder.append(digitsToWords.get(hundreds)).append(" hundred ");
+				spelledOutDollarAmountStringBuilder.append(digitsToWords.get(hundreds)).append(HUNDRED_STRING);
 			}
 
 			final long tens = (amount / 10) * 10;
 			if (tens > 0) {
-				spelledOutDollarAmountStringBuilder.append(digitsToWords.get(tens)).append('-');
+				spelledOutDollarAmountStringBuilder.append(digitsToWords.get(tens)).append(DASH);
 			}
 
 			final long ones = amount % 10;
@@ -119,7 +130,7 @@ public class CheckAmount {
 
 	private String determineCentAmount(final String[] dollarsAndCents) {
 		if (dollarsAndCents.length == 1 || dollarsAndCents.length == 0) {
-			return "00";
+			return ZERO_CENTS;
 		}
 		return dollarsAndCents[1];
 	}
