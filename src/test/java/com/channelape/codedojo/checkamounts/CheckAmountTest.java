@@ -124,7 +124,7 @@ public class CheckAmountTest {
 	}
 
 	@Test
-	public void given4200673357DollarsAnd00CentsWhenSpellingOutCheckAmountThenExpectFortyBillionTwoHundredMillionSixHundSeventyThreeThousandThreeHundredFiftySevenAnd00Over100Dollars() {
+	public void given4000000000DollarsAnd00CentsWhenSpellingOutCheckAmountThenExpectFortyBillionAnd00Over100Dollars() {
 		final CheckAmount checkAmount = new CheckAmount("4000000000.00");
 		final String actualSpelledOutCheckAmount = checkAmount.getSpelledOutCheckAmount();
 		assertEquals("Four billion and 00/100 dollars", actualSpelledOutCheckAmount);

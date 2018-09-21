@@ -5,18 +5,19 @@ import java.util.Map;
 
 public class CheckAmount {
 
+	private static final char SPACE = ' ';
 	private static final String DOLLAR_AND_CENTS_SEPERATOR = "\\.";
 	private static final String ZERO_CENTS = "00";
 	private static final String OVER_ONE_HUNDRED = "/100 dollars";
-	private static final String AND = " and ";
-	private static final String MILLION_STRING = "million ";
-	private static final String BILLION_STRING = " billion ";
-	private static final String HUNDRED_STRING = " hundred ";
+	private static final String AND = "and ";
+	private static final String HUNDRED_STRING = "hundred";
+	private static final String THOUSAND_STRING = "thousand";
+	private static final String MILLION_STRING = "million";
+	private static final String BILLION_STRING = "billion";
 	private static final char DASH = '-';
 	private static final int ONE_THOUSAND = 1000;
 	private static final int ONE_BILLION = 1000000000;
 	private static final int ONE_MILLION = 1000000;
-	private static final String THOUSAND_STRING = " thousand ";
 	private final String value;
 	private static final Map<Long, String> digitsToWords;
 	static {
@@ -63,9 +64,11 @@ public class CheckAmount {
 	}
 
 	private StringBuilder determineSpelledOutDollarAmount(final String amount) {
+		final StringBuilder ret = new StringBuilder();
+
 		final long integerAmount = Long.parseLong(amount);
 		if (integerAmount < ONE_THOUSAND) {
-			return determineHundredsGroup(integerAmount);
+			return determineHundredsGroup(integerAmount, ret, "");
 		}
 		final long billionsAmount = integerAmount / ONE_BILLION;
 		final long millionsAmount = (integerAmount - (billionsAmount * ONE_BILLION)) / ONE_MILLION;
@@ -74,43 +77,37 @@ public class CheckAmount {
 		final long hundredsAmount = (integerAmount - (millionsAmount * ONE_MILLION) - (billionsAmount * ONE_BILLION)
 				- (thousandsAmount * ONE_THOUSAND));
 
-		final StringBuilder hundredsAmountString = determineHundredsGroup(hundredsAmount);
-		final StringBuilder thousandsAmountString = determineHundredsGroup(thousandsAmount);
-		final StringBuilder millionsAmountString = determineHundredsGroup(millionsAmount);
-		final StringBuilder billionsAmountString = determineHundredsGroup(billionsAmount);
-
-		final StringBuilder ret = new StringBuilder();
-
-		if (billionsAmount > 0) {
-			ret.append(billionsAmountString).append(BILLION_STRING);
-		}
-
-		if (millionsAmount > 0) {
-			ret.append(millionsAmountString).append(MILLION_STRING);
-		}
-
-		if (thousandsAmount > 0) {
-			ret.append(thousandsAmountString).append(THOUSAND_STRING);
-		}
-
-		ret.append(hundredsAmountString);
+		determineHundredsGroup(billionsAmount, ret, BILLION_STRING);
+		determineHundredsGroup(millionsAmount, ret, MILLION_STRING);
+		determineHundredsGroup(thousandsAmount, ret, THOUSAND_STRING);
+		determineHundredsGroup(hundredsAmount, ret, HUNDRED_STRING);
 
 		return ret;
 	}
 
-	private StringBuilder determineHundredsGroup(long amount) {
-		final StringBuilder spelledOutDollarAmountStringBuilder = new StringBuilder();
+	private StringBuilder determineHundredsGroup(long amount, final StringBuilder spelledOutDollarAmountStringBuilder,
+			final String placeValueGroup) {
+		if (amount == 0) {
+			return spelledOutDollarAmountStringBuilder;
+		}
 		if (digitsToWords.containsKey(amount)) {
-			spelledOutDollarAmountStringBuilder.append(digitsToWords.get(amount));
+			spelledOutDollarAmountStringBuilder.append(digitsToWords.get(amount)).append(SPACE).append(placeValueGroup)
+					.append(SPACE);
+			return spelledOutDollarAmountStringBuilder;
 		} else {
+
 			final long hundreds = amount / 100;
 			if (hundreds > 0) {
 				amount -= hundreds * 100;
-				spelledOutDollarAmountStringBuilder.append(digitsToWords.get(hundreds)).append(HUNDRED_STRING);
+				spelledOutDollarAmountStringBuilder.append(digitsToWords.get(hundreds)).append(SPACE)
+						.append(HUNDRED_STRING);
 			}
 
 			final long tens = (amount / 10) * 10;
 			if (tens > 0) {
+				if (hundreds > 0) {
+					spelledOutDollarAmountStringBuilder.append(SPACE);
+				}
 				spelledOutDollarAmountStringBuilder.append(digitsToWords.get(tens)).append(DASH);
 			}
 
@@ -118,6 +115,10 @@ public class CheckAmount {
 			if (ones > 0) {
 				spelledOutDollarAmountStringBuilder.append(digitsToWords.get(ones));
 			}
+		}
+		spelledOutDollarAmountStringBuilder.append(SPACE).append(placeValueGroup);
+		if (!placeValueGroup.equals("")) {
+			spelledOutDollarAmountStringBuilder.append(SPACE);
 		}
 		return spelledOutDollarAmountStringBuilder;
 	}
